@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unit Test Tracker — Premium V2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div>
+          <p class="eyebrow">Engineering Productivity</p>
+          <h1>Unit Test Tracker <span class="premium-badge">V2 Premium</span></h1>
+          <p class="subtitle">
+            Track current scripts, plan next tests, and keep progress visible.
+          </p>
+          <p class="shortcut-hint">Shortcuts: <kbd>N</kbd> New, <kbd>/</kbd> Search, <kbd>Ctrl/Cmd + S</kbd> Save</p>
+        </div>
+
+        <div class="topbar-right">
+          <button id="themeToggleBtn" class="btn btn-ghost" title="Toggle dark/light mode">
+            Toggle Theme
+          </button>
+          <div class="stats-wrap card glass">
+            <div class="stat">
+              <span id="totalCount">0</span>
+              <small>Total</small>
+            </div>
+            <div class="stat">
+              <span id="doneCount">0</span>
+              <small>Done</small>
+            </div>
+            <div class="stat">
+              <span id="plannedCount">0</span>
+              <small>Planned</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="controls card glass">
+        <div class="controls-top">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="all">All</button>
+            <button class="tab-btn" data-tab="existing">Existing Scripts</button>
+            <button class="tab-btn" data-tab="planned">Planned Tests</button>
+          </div>
+          <div class="chart-card">
+            <svg id="progressChart" viewBox="0 0 120 120" aria-label="Progress chart">
+              <circle class="track" cx="60" cy="60" r="46"></circle>
+              <circle class="progress" cx="60" cy="60" r="46"></circle>
+              <text id="chartPercent" x="60" y="58">0%</text>
+              <text x="60" y="74" class="chart-sub">Done</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="field">
+            <label for="searchInput">Search</label>
+            <input id="searchInput" type="text" placeholder="title, module, notes..." />
+          </div>
+          <div class="field">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter">
+              <option value="all">All Statuses</option>
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Done">Done</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="priorityFilter">Priority</label>
+            <select id="priorityFilter">
+              <option value="all">All Priorities</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button id="clearFiltersBtn" class="btn btn-ghost">Clear</button>
+          </div>
+        </div>
+
+        <div class="io-row">
+          <button id="exportBtn" class="btn btn-primary">Export JSON</button>
+          <label for="importFile" class="btn btn-ghost">Import JSON</label>
+          <input id="importFile" type="file" accept="application/json" hidden />
+        </div>
+      </section>
+
+      <section class="form-section card glass" id="formSection">
+        <div class="section-head">
+          <h2 id="formTitle">Add Test Item</h2>
+          <span class="pill">Quick Entry</span>
+        </div>
+        <form id="testForm">
+          <input type="hidden" id="itemId" />
+          <div class="grid">
+            <label>
+              Title / Test Name
+              <input id="title" type="text" required maxlength="120" />
+            </label>
+            <label>
+              Module / Component
+              <input id="module" type="text" required maxlength="120" />
+            </label>
+            <label>
+              Type
+              <select id="type" required>
+                <option value="existing">Existing</option>
+                <option value="planned">Planned</option>
+              </select>
+            </label>
+            <label>
+              Status
+              <select id="status" required>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+              </select>
+            </label>
+            <label>
+              Priority
+              <select id="priority" required>
+                <option value="High">High</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            Notes
+            <textarea id="notes" rows="3" maxlength="500" placeholder="Design notes, edge cases, TODO..."></textarea>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+            <button type="button" class="btn btn-ghost" id="cancelEditBtn" hidden>Cancel Edit</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="list-section card glass">
+        <div class="section-head">
+          <h2>Test Items</h2>
+          <span id="visibleCount" class="pill">0 visible</span>
+        </div>
+
+        <div class="drag-help">Tip: drag & drop cards to reorder priority manually.</div>
+
+        <div id="emptyState" class="empty">
+          <h3>No test items yet</h3>
+          <p>Press <kbd>N</kbd> to jump to the form and add your first item.</p>
+        </div>
+
+        <ul id="testList" class="test-list"></ul>
+      </section>
+    </main>
+
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <template id="itemTemplate">
+      <li class="test-item" draggable="true">
+        <div class="item-main">
+          <div class="item-title-row">
+            <h3 class="item-title"></h3>
+          </div>
+          <p class="item-meta"></p>
+          <p class="item-notes"></p>
+          <div class="badges"></div>
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-small btn-ghost edit-btn">Edit</button>
+          <button class="btn btn-small btn-danger delete-btn">Delete</button>
+        </div>
+      </li>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
